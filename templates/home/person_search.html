@@ -1,0 +1,83 @@
+<form name="person" class="md-padding" action="/search/person">
+	<div class="title">
+		Basic info
+	</div>
+	<div layout="row">
+		<md-input-container flex>
+			<label>First Name</label>
+			<input ng-model="query.firstname" name="firstname">
+		</md-input-container>
+		<md-input-container flex>
+			<label>Last Name</label>
+			<input ng-model="query.lastname" name="lastname">
+		</md-input-container>
+		<div>
+			<md-button type="submit" class="md-raised">Search &gt;</md-button>
+		</div>
+	</div>
+	<div class="title">
+		Feelin' a bit picky?
+	</div>
+	<div layout="row">
+		<md-input-container flex="50">
+			<label>Place of Birth</label>
+			<input ng-model="query.placeOfBirth" name="placeofbirth">
+		</md-input-container>
+		<md-input-container>
+			<label>Gender</label>
+			<md-select name="gender" ng-model="query.gender">
+				<md-option value="M">Male</md-option>
+				<md-option value="F">Female</md-option>
+			</md-select>
+		</md-input-container>
+	</div>
+	<div>Date of Birth</div>
+	<div layout="row">
+		<md-input-container>
+			<label>Year</label>
+			<input ng-model="query.dateOfBirth.year" name="birthyear" ng-pattern="/^\d{4}$/">
+			<div ng-messages="person.birthyear.$error">
+				<div ng-message="pattern">Please enter a valid year.</div>
+			</div>
+		</md-input-container>
+		<md-input-container>
+			<label>Month</label>
+			<input type="number" ng-model="query.dateOfBirth.month" name="birthmonth" ng-pattern="/^(1[0-2]|[1-9])$/" min="1" max="12">
+			<div ng-messages="person.birthmonth.$error">
+				<div ng-message="pattern">Please enter a valid month.</div>
+			</div>
+		</md-input-container>
+		<md-input-container>
+			<label>Day</label>
+			<input type="number" ng-model="query.dateOfBirth.day" name="birthday" ng-pattern="/^(3[01]|[1-2][0-9]|[1-9])$/" min="1" max="31">
+			<div ng-messages="person.birthday.$error">
+				<div ng-message="pattern">Please enter a valid day.</div>
+			</div>
+		</md-input-container>
+	</div>
+	<div>Date of Death</div>
+	<div layout="row">
+		<md-input-container>
+			<label>Year</label>
+			<input ng-model="query.dateOfDeath.year" name="deathyear" ng-pattern="/^\d{4}$/">
+			<div ng-messages="person.deathyear.$error">
+				<div ng-message="pattern">Please enter a valid year.</div>
+			</div>
+		</md-input-container>
+		<md-input-container>
+			<label>Month</label>
+			<input type="number" ng-model="query.dateOfDeath.month" name="deathmonth" ng-pattern="/^(1[0-2]|[1-9])$/" min="1" max="12">
+			<div ng-messages="person.deathmonth.$error">
+				<div ng-message="pattern">Please enter a valid month.</div>
+			</div>
+		</md-input-container>
+		<md-input-container>
+			<label>Day</label>
+			<input type="number" ng-model="query.dateOfDeath.day" name="deathday" ng-pattern="/^(3[01]|[1-2][0-9]|[1-9])$/" min="1" max="12">
+			<div ng-messages="person.deathday.$error">
+				<div ng-message="pattern">Please enter a valid day.</div>
+			</div>
+		</md-input-container>
+	</div>
+
+</form>

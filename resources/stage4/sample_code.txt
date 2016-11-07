@@ -1,0 +1,24 @@
+select
+	c.lastName,
+	c.firstName,
+	t.description,
+	i.roleDescription
+from
+	Involving i,
+	InvolvingType t,
+	Celebrity c
+where
+	i.cinematographyId = (
+		select
+			id
+		from
+			Cinematography
+		where
+			title like "Rick and Morty"
+		order by
+			productionYear
+		asc
+		limit 1
+	) and 
+	i.involvingTypeId = t.id and
+	i.celebrityId = c.id
