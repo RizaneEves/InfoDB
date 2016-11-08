@@ -34,7 +34,7 @@
 	*/
 	$query = new DBQuery($db);
 	$query->group = new DBGroup([
-		new DBSelect(["c.id", "c.title", "c.productionYear", "i.description"]),
+		new DBSelect(["c.id", "c.title", "c.productionYear", "i.description", "c.type"]),
 		new DBFrom(["Cinematography c LEFT JOIN CinematographyInfo i ON c.id = i.cinematographyId"]),
 		$whereClause,
 		new DBOrder(["case when i.description IS NULL then 1 else 0 end", "ABS(YEAR(NOW()) - CAST(c.productionYear AS SIGNED)) ASC", "c.title ASC"])
@@ -94,7 +94,7 @@
 					<?php foreach($result as $row){ ?>
 					<md-list-item class="md-long-text" ng-click="displayMovie(<?php echo $row[0] ?>)"> <!-- Dangerous but no one cares -->
 						<div class="md-list-item-text">
-							<h3><?php echo $row[1] . " (" . $row[2] . ")" ?></h3>
+							<h3><?php echo $row[1] . " (" . $row[2].", ".$row[4] . ")" ?></h3>
 							<p><?php 
 								$bio = $row[3];
 								$bio = strlen($bio) > 300 ? trim(substr($bio, 0, 300))."..." : $bio;

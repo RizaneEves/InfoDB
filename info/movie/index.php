@@ -2,67 +2,45 @@
 	$root = $_SERVER['DOCUMENT_ROOT'];
 	include $root."/internal/commons.php";
 	$activePage = "search";
+	date_default_timezone_set('America/Chicago');
 
-	$page = ifnset("page", 1);
-	$pagelen = ifnset("len", 5);
+	$id = ifnset("id", 0);
 
-	if($page < 0){
-		exit("Invalid parameters");
-	}
-
-	$productionYearComp = "=";
-	switch($_GET["productionyearcomp"]){
-		case "before": $productionYearComp = "<"; break;
-		case "after" : $productionYearComp = ">"; break;
-		default      : $productionYearComp = "="; break;
+	if($id === 0){
+		header("Location: /");
+		exit();
 	}
 
 	$whereClause = DBQueryPart::buildWhereClauseFromQuery([
-		["c.title LIKE ?", "title", function($v){ return "%".$v."%"; }, "s"],
-		["c.productionYear ".$productionYearComp." ?", "productionyear", function($v){ return $v; }, "i"],
-		["c.type = ?", "type", function($v){ return $v; }, "s"]
+		["c.id = ?", "id", function($v){ return $v; }, "i"],
 	]);
 
 	$db = new DBAccess();
 
-	/*
-		select c.title, i.description 
-		FROM Cinematography c LEFT JOIN CinematographyInfo i ON c.id = i.cinematographyId 
-		WHERE *conditions* 
-		ORDER BY *order conditions*
-		LIMIT ?,?
-	*/
 	$query = new DBQuery($db);
+
+	// fetch basic info
 	$query->group = new DBGroup([
-		new DBSelect(["c.id", "c.title", "c.productionYear", "i.description"]),
+		new DBSelect(["c.id", "c.title", "IFNULL(i.description, \"No description.\")", "c.productionYear", "c.type"]),
 		new DBFrom(["Cinematography c LEFT JOIN CinematographyInfo i ON c.id = i.cinematographyId"]),
-		$whereClause,
-		new DBOrder(["case when i.description IS NULL then 1 else 0 end", "ABS(YEAR(NOW()) - CAST(c.productionYear AS SIGNED)) ASC", "c.title ASC"])
+		$whereClause
 	]);
 
-	$starttime = microtime(true);
-	$result = $query->queryRange($pagelen, $page);
-	$endtime = microtime(true);
-	$timeused = $endtime - $starttime;
-	$resultLen = $db->getLastQueryCount();
+	$basicInfo = $query->query();
 
-	if(!$result){
+	if(!$basicInfo || count($basicInfo) < 1){
 		exit("Invalid query.");
 	}
+	$basicInfo = $basicInfo[0];	// select first row
 
-	$maxPage = ceil($resultLen / $pagelen);
-
-	parse_str($_SERVER['QUERY_STRING'], $params);
-	$nextparams = $prevparams = $firstparams = $lastparams = $params;
-	$nextparams["page"] = $page + 1;
-	$prevparams["page"] = $page - 1;
-	$firstparams["page"] = 1;
-	$lastparams["page"] = $maxPage;
-	$nexturl = "?".http_build_query($nextparams);
-	$prevurl = "?".http_build_query($prevparams);
-	$firsturl = "?".http_build_query($firstparams);
-	$lasturl = "?".http_build_query($lastparams);
-
+	// fetch involved celebrities
+	$query->group = new DBGroup([
+		new DBSelect(["c.id", "c.firstname", "c.lastname", "t.description"]),
+		new DBFrom(["Involving i JOIN Celebrity c ON i.celebrityId = c.id JOIN InvolvingType t ON t.id = i.involvingTypeId"]),
+		new DBWhere(["i.cinematographyId = ?"], [[$id, "i"]]),
+		new DBOrder(["c.firstname ASC", "c.lastname ASC"])
+	]);
+	$celebrities = $query->query();
 ?>
 <!doctype html>
 <html>
@@ -82,46 +60,47 @@
  		<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js"></script>
 
 		<script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js"></script>
+
+		<link rel="stylesheet" href="styles.css">
 		<script src="main.js"></script>
 	</head>
 	<body class="body container-fluid">
 		<?php include($root."/templates/commons/header.php") ?>
 		<div id="wrapper" class="row" ng-app="infodb" ng-controller="main">
 			<div id="content" class="col-md-8">
-				<div class="title">Are you talking about...</div>
-				<small>Query took <?php echo round($timeused,2) ?> seconds.</small>
-				<md-list>
-					<?php foreach($result as $row){ ?>
-					<md-list-item class="md-long-text" ng-click="displayMovie(<?php echo $row[0] ?>)"> <!-- Dangerous but no one cares -->
+				<h1><?php echo $basicInfo[1] ?></h1>
+				
+				<!-- Type -->
+				<md-content class="info-paragraph text-capitalize">
+					<?php echo $basicInfo[4] ?>
+					<?php if($basicInfo[3]){ echo " - Produced during ".$basicInfo[3]; } ?>
+				</md-content>
+
+				<!-- Description -->
+				<div class="title">Description</div>
+				<md-content md-ink-ripple ng-click="displayBio()" class="info-paragraph"><p><?php
+					$bio = $basicInfo[2];
+					$bio = strlen($bio) > 300 ? trim(substr($bio, 0, 300))."..." : $bio;
+					// replace movie qv's with <em>'s
+					$bio = preg_replace("/_([^_]*)_ \(qv\)/", "<em>$1</em>", $bio);
+					// replace person qv's with <em>'s
+					$bio = preg_replace("/'([^']*)' \(qv\)/", "<em>$1</em>", $bio);
+					echo $bio;
+				?></p></md-content>
+
+				<!-- Involved Celebrities -->
+				<div class="title">Cast</div>
+				<md-list flex>
+				<?php foreach($celebrities as $celebrity){ ?>
+					<md-list-item class="md-2-line" ng-click="displayPerson(<?php echo $celebrity[0] ?>)"> <!-- Not safe but no one cares -->
 						<div class="md-list-item-text">
-							<h3><?php echo $row[1] . " (" . $row[2] . ")" ?></h3>
-							<p><?php 
-								$bio = $row[3];
-								$bio = strlen($bio) > 300 ? trim(substr($bio, 0, 300))."..." : $bio;
-								// replace movie qv's with <em>'s
-								$bio = preg_replace("/_([^_]*)_ \(qv\)/", "<em>$1</em>", $bio);
-								// replace person qv's with <em>'s
-								$bio = preg_replace("/'([^']*)' \(qv\)/", "<em>$1</em>", $bio);
-								echo $bio ?: "No description";
-							?></p>
+							<h3><?php echo $celebrity[1]." ".$celebrity[2] ?>
+							<p><?php echo $celebrity[3] ?>
 						</div>
 					</md-list-item>
 					<md-divider></md-divider>
-					<?php }; ?>
+				<?php }; ?>
 				</md-list>
-				<nav>
-					<ul class="pager">
-						<li><a href="<?php echo $firsturl ?>">First</a></li>
-						<?php if($page > 1){ ?>
-							<li><a href="<?php echo $prevurl ?>">Previous</a></li>
-						<?php }; ?>
-						<li>Page <?php echo $page . " of " . $maxPage ?></li>
-						<?php if($page < $maxPage){ ?>
-							<li><a href="<?php echo $nexturl ?>">Next</a></li>
-						<?php }; ?>
-						<li><a href="<?php echo $lasturl ?>">Last</a></li>
-					</ul>
-				</nav>
 			</div>
 			<?php include($root."/templates/commons/sidebar.php") ?>
 		</div>

@@ -45,7 +45,7 @@
 	
 	// fetch involved cinematographies
 	$query->group = new DBGroup([
-		new DBSelect(["c.title", "c.productionYear", "t.description"]),
+		new DBSelect(["c.id", "c.title", "c.productionYear", "t.description"]),
 		new DBFrom(["Involving i JOIN Cinematography c ON i.cinematographyId = c.id JOIN InvolvingType t ON t.id = i.involvingTypeId"]),
 		new DBWhere(["i.celebrityId = ?"], [[$id, "i"]]),
 		new DBOrder(["c.productionYear DESC"])
@@ -109,11 +109,12 @@
 				<div class="title">Cinematographies</div>
 				<md-list flex>
 				<?php foreach($cinematographies as $cinematography){ ?>
-					<?php if(preg_match("/\(.*\)/", $cinematography[0])){ continue; } ?>
-					<md-list-item class="md-2-line">
+					<?php /* Remove titles that are in parenthesis */ ?>
+					<?php if(preg_match("/\(.*\)/", $cinematography[1])){ continue; } ?>
+					<md-list-item class="md-2-line" ng-click="displayMovie(<?php echo $cinematography[0] ?>)"> <!-- Not safe but no one cares -->
 						<div class="md-list-item-text">
-							<h3><?php echo $cinematography[0] ?>
-							<p><?php echo $cinematography[1]." - ".$cinematography[2] ?>
+							<h3><?php echo $cinematography[1] ?>
+							<p><?php echo $cinematography[2]." - ".$cinematography[3] ?>
 						</div>
 					</md-list-item>
 					<md-divider></md-divider>

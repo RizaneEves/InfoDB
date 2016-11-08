@@ -8,6 +8,6 @@ app.config(function($mdThemingProvider) {
 
 app.controller("main", function($scope, $http){
 	$scope.displayMovie = function(id){
-		alert("Displaying " + id);
+		location.href = "/info/movie/?id=" + id;
 	};
 });
