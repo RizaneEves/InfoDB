@@ -35,8 +35,8 @@
 
 	// fetch involved celebrities
 	$query->group = new DBGroup([
-		new DBSelect(["c.id", "c.firstname", "c.lastname", "t.description"]),
-		new DBFrom(["Involving i JOIN Celebrity c ON i.celebrityId = c.id JOIN InvolvingType t ON t.id = i.involvingTypeId"]),
+		new DBSelect(["c.id", "c.firstname", "c.lastname", "t.description", "r.characterName"]),
+		new DBFrom(["Involving i JOIN Celebrity c ON i.celebrityId = c.id JOIN InvolvingType t ON t.id = i.involvingTypeId LEFT JOIN PersonRoleType r ON i.characterNameId = r.id"]),
 		new DBWhere(["i.cinematographyId = ?"], [[$id, "i"]]),
 		new DBOrder(["c.firstname ASC", "c.lastname ASC"])
 	]);
@@ -94,8 +94,10 @@
 				<?php foreach($celebrities as $celebrity){ ?>
 					<md-list-item class="md-2-line" ng-click="displayPerson(<?php echo $celebrity[0] ?>)"> <!-- Not safe but no one cares -->
 						<div class="md-list-item-text">
+							<!-- Person Name -->
 							<h3><?php echo $celebrity[1]." ".$celebrity[2] ?>
-							<p><?php echo $celebrity[3] ?>
+							<!-- Role Name [as Character Name] -->
+							<p><?php echo $celebrity[3] ?> <?php if($celebrity[4]){ echo "as ".$celebrity[4]; } ?></p>
 						</div>
 					</md-list-item>
 					<md-divider></md-divider>
