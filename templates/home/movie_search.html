@@ -1,0 +1,47 @@
+<form name="person" class="md-padding" action="/search/movie">
+	<div class="title">
+		Basic info
+	</div>
+	<div layout="row">
+		<md-input-container flex>
+			<label>Title / Keywords</label>
+			<input ng-model="query.movie.title" name="title">
+		</md-input-container>
+		<div>
+			<md-button type="submit" class="md-raised">Search &gt;</md-button>
+		</div>
+	</div>
+	<div class="title">
+		Feelin' a bit picky?
+	</div>
+	<div layout="row">
+		<md-input-container>
+			<label>Cinematography Type</label>
+			<md-select name="type" ng-model="query.movie.type">
+				<md-option value="tv series">TV Series</md-option>
+				<md-option value="episode">TV Episodes</md-option>
+				<md-option value="movie">Movies</md-option>
+				<md-option value="video movie">Video Movies</md-option>
+				<md-option value="tv movie">TV Movies</md-option>
+				<md-option value="video game">Video Games</md-option>
+			</md-select>
+		</md-input-container>
+	</div>
+	<div>Date of Production</div>
+	<div layout="row">
+		<md-input-container>
+			<md-select name="productionyearcomp" ng-model="query.movie.productionYearComp">
+				<md-option value="before">Before</md-option>
+				<md-option value="during">During</md-option>
+				<md-option value="after">After</md-option>
+			</md-select>
+		</md-input-container>
+		<md-input-container>
+			<label>Production Year</label>
+			<input ng-model="query.movie.productionYear" name="productionyear" ng-pattern="/^\d{4}$/">
+			<div ng-messages="person.productionyear.$error">
+				<div ng-message="pattern">Please enter a valid year.</div>
+			</div>
+		</md-input-container>
+	</div>
+</form>

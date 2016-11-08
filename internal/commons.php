@@ -96,7 +96,12 @@ class DBQuery{
 		$query_str = $parts[0];
 		$query_vars = $parts[1];
 		
-		return $this->db->query($query_str, $query_vars);
+		$starttime = microtime(true);
+		$results = $this->db->query($query_str, $query_vars);
+		$endtime = microtime(true);
+		$this->queryTime = $endtime - $starttime;
+
+		return $results;
 	}
 	
 	/** Execute the query with a range constraint. */
@@ -188,6 +193,13 @@ class DBGroup extends DBQueryPart{
 class DBSelect extends DBQueryPart{
 	function __construct($columns, $vars = []){
 		parent::__construct("select SQL_CALC_FOUND_ROWS", ",", $columns, $vars);
+	}
+}
+
+/* Represents a SELECT DISTINCT clause. */
+class DBSelectDistinct extends DBQueryPart{
+	function __construct($columns, $vars = []){
+		parent::__construct("select SQL_CALC_FOUND_ROWS distinct", ",", $columns, $vars);
 	}
 }
 

@@ -7,4 +7,10 @@ app.config(function($mdThemingProvider) {
 });
 
 app.controller("main", function($scope, $http){
+	$scope.query = {
+		person: {},
+		movie: {
+			productionYearComp: "during"
+		}
+	};
 });

@@ -10,34 +10,34 @@
 		exit("Invalid parameters");
 	}
 
+	$productionYearComp = "=";
+	switch($_GET["productionyearcomp"]){
+		case "before": $productionYearComp = "<"; break;
+		case "after" : $productionYearComp = ">"; break;
+		default      : $productionYearComp = "="; break;
+	}
+
 	$whereClause = DBQueryPart::buildWhereClauseFromQuery([
-		["c.firstname LIKE ?", "firstname", function($v){ return "%".$v."%"; }, "s"],
-		["c.lastname LIKE ?", "lastname", function($v){ return "%".$v."%"; }, "s"],
-		["c.placeOfBirth LIKE ?", "placeofbirth", function($v){ return "%".$v."%"; }, "s"],
-		["c.gender LIKE ?", "gender", function($v){ return $v; }, "s"],
-		["YEAR(c.dateOfBirth) = ?", "birthyear", function($v){ return $v; }, "i"],
-		["MONTH(c.dateOfBirth) = ?", "birthmonth", function($v){ return $v; }, "i"],
-		["DAY(c.dateOfBirth) = ?", "birthday", function($v){ return $v; }, "i"],
-		["YEAR(c.dateOfDeath) = ?", "deathyear", function($v){ return $v; }, "i"],
-		["MONTH(c.dateOfDeath) = ?", "deathmonth", function($v){ return $v; }, "i"],
-		["DAY(c.dateOfDeath) = ?", "deathday", function($v){ return $v; }, "i"]
+		["c.title LIKE ?", "title", function($v){ return "%".$v."%"; }, "s"],
+		["c.productionYear ".$productionYearComp." ?", "productionyear", function($v){ return $v; }, "i"],
+		["c.type = ?", "type", function($v){ return $v; }, "s"]
 	]);
 
 	$db = new DBAccess();
 
 	/*
-		select c.firstname, c.lastname, i.description 
-		FROM Celebrity c LEFT JOIN CelebrityInfo i ON c.id = i.celebrityId 
+		select c.title, i.description 
+		FROM Cinematography c LEFT JOIN CinematographyInfo i ON c.id = i.cinematographyId 
 		WHERE *conditions* 
-		ORDER BY LENGTH(i.description) DESC, c.firstname ASC, c.lastname ASC
+		ORDER BY *order conditions*
 		LIMIT ?,?
 	*/
 	$query = new DBQuery($db);
 	$query->group = new DBGroup([
-		new DBSelect(["c.id", "c.firstname", "c.lastname", "i.description"]),
-		new DBFrom(["Celebrity c LEFT JOIN CelebrityInfo i ON c.id = i.celebrityId"]),
+		new DBSelect(["c.id", "c.title", "c.productionYear", "i.description"]),
+		new DBFrom(["Cinematography c LEFT JOIN CinematographyInfo i ON c.id = i.cinematographyId"]),
 		$whereClause,
-		new DBOrder(["LENGTH(i.description) DESC", "c.firstname ASC", "c.lastname ASC"])
+		new DBOrder(["case when i.description IS NULL then 1 else 0 end", "ABS(YEAR(NOW()) - CAST(c.productionYear AS SIGNED)) ASC", "c.title ASC"])
 	]);
 
 	$starttime = microtime(true);
@@ -92,9 +92,9 @@
 				<small>Query took <?php echo round($timeused,2) ?> seconds.</small>
 				<md-list>
 					<?php foreach($result as $row){ ?>
-					<md-list-item class="md-long-text" ng-click="displayPerson(<?php echo $row[0] ?>)"> <!-- Dangerous but no one cares -->
+					<md-list-item class="md-long-text" ng-click="displayMovie(<?php echo $row[0] ?>)"> <!-- Dangerous but no one cares -->
 						<div class="md-list-item-text">
-							<h3><?php echo $row[1] . " " . $row[2] ?></h3>
+							<h3><?php echo $row[1] . " (" . $row[2] . ")" ?></h3>
 							<p><?php 
 								$bio = $row[3];
 								$bio = strlen($bio) > 300 ? trim(substr($bio, 0, 300))."..." : $bio;
@@ -102,7 +102,7 @@
 								$bio = preg_replace("/_([^_]*)_ \(qv\)/", "<em>$1</em>", $bio);
 								// replace person qv's with <em>'s
 								$bio = preg_replace("/'([^']*)' \(qv\)/", "<em>$1</em>", $bio);
-								echo $bio ?: "No biography";
+								echo $bio ?: "No description";
 							?></p>
 						</div>
 					</md-list-item>

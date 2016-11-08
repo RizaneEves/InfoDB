@@ -7,8 +7,7 @@ app.config(function($mdThemingProvider) {
 });
 
 app.controller("main", function($scope, $http){
-	$scope.displayPerson = function(id){
-		location.href = "/info/person?id=" + id;
+	$scope.displayMovie = function(id){
+		alert("Displaying " + id);
 	};
-
 });
