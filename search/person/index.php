@@ -7,7 +7,7 @@
 	$pagelen = ifnset("len", 5);
 
 	if($page < 0){
-		exit("Invalid parameters");
+		returnStatus(400);
 	}
 
 	$whereClause = DBQueryPart::buildWhereClauseFromQuery([
@@ -40,14 +40,12 @@
 		new DBOrder(["LENGTH(i.description) DESC", "c.firstname ASC", "c.lastname ASC"])
 	]);
 
-	$starttime = microtime(true);
 	$result = $query->queryRange($pagelen, $page);
-	$endtime = microtime(true);
-	$timeused = $endtime - $starttime;
+	$timeused = $db->getLastQueryTime();
 	$resultLen = $db->getLastQueryCount();
 
 	if(!$result){
-		exit("Invalid query.");
+		returnStatus(400);
 	}
 
 	$maxPage = ceil($resultLen / $pagelen);

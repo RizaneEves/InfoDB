@@ -44,12 +44,21 @@ class DBAccess {
 		}
 
 		// execute statement
+		$starttime = microtime(true);
 		$stmt->execute();
+		$endtime = microtime(true);
+		$this->queryTime = $endtime - $starttime;
 
 		// bind results
 		$bind_result_refs = [];
 		$bind_results = [];
 		$meta = $stmt->result_metadata();
+
+		if(!$meta){
+			// no result
+			return false;
+		}
+
 		while($field = $meta->fetch_field()){
 			// fill with random stuff
 			$bind_result_refs[] = $field->name;
@@ -79,6 +88,10 @@ class DBAccess {
 		return $this->query("select found_rows()", [])[0][0];
 	}
 
+	function getLastQueryTime(){
+		return $this->queryTime;
+	}
+
 };
 
 /** Query object for DBAccess that simplifies the process of making queries. */
@@ -95,11 +108,8 @@ class DBQuery{
 		$parts = $this->group->getPart();
 		$query_str = $parts[0];
 		$query_vars = $parts[1];
-		
-		$starttime = microtime(true);
+
 		$results = $this->db->query($query_str, $query_vars);
-		$endtime = microtime(true);
-		$this->queryTime = $endtime - $starttime;
 
 		return $results;
 	}
@@ -132,6 +142,13 @@ class DBQueryPart{
 		$query_vars = [];
 
 		$i = -1;
+		preg_replace_callback("/[\?]/", function($match) use(&$i, &$query_vars){
+			$i++;
+			if($match[0] == "?"){
+				$query_vars[] = $this->vars[$i];
+				return "?";
+			}
+		}, $this->prefix);
 		foreach($this->content as $content){
 			$query_strs[] = preg_replace_callback("/[@\?]/", function($match) use(&$i, &$query_vars){
 				$i++;
@@ -141,7 +158,7 @@ class DBQueryPart{
 						$parts = $this->vars[$i]->getPart();
 						$query_vars = array_merge($query_vars, $parts[1]);
 
-						return $parts[0];
+						return "(".$parts[0].")";
 					case "?":
 						$query_vars[] = $this->vars[$i];
 						return "?";
@@ -185,7 +202,7 @@ class DBGroup extends DBQueryPart{
 			$query_str .= " " . $part[0];
 			$query_vars = array_merge($query_vars, $part[1]);
 		}
-		return ["(".trim($query_str).") ".$this->name, $query_vars];
+		return [trim($query_str).$this->name, $query_vars];
 	}
 }
 
@@ -231,10 +248,40 @@ class DBLimit extends DBQueryPart{
 	}
 }
 
+/* Represents a INSERT INTO clause. */
+class DBInsertValues extends DBQueryPart{
+	function __construct($tableName, $columns, $values){
+		parent::__construct("INSERT INTO $tableName(" . join(",", $columns) . ") VALUES(" . join(",", array_fill(0, count($values), "?")) . ")", "",
+			[], $values);
+	}
+}
+
+
+class QueryCache{
+	public static function storeEntry($type, $data, $dataType){
+		$typeIdLookUp = [
+			"celebrity" => 1,
+			"cinematography" => 2,
+		];
+
+		$db = new DBAccess();
+		$query = new DBQuery($db);
+		$query->group = new DBGroup([
+			new DBInsertValues("QueryCache", ["CategoryId", "info"], [[$typeIdLookUp[$type], "i"], [$data, $dataType]])
+		]);
+		$query->query();
+	}
+}
+
 
 /** Convenient function: Returns $defaultValue if $_GET[$getName] is not set, otherwise returns $_GET[$getName]. */
 function ifnset($getName, $defaultValue){
 	return isset($_GET[$getName]) ? trim($_GET[$getName]) : $defaultValue;
+}
+
+function returnStatus($s){
+	header("Location: /error/?code=".$s);
+	exit();
 }
 
 ?>

@@ -11,6 +11,18 @@ app.controller("main", function($scope, $http){
 		person: {},
 		movie: {
 			productionYearComp: "during"
+		},
+		dos: {},
+		helpers: {
+			queryPersonId: function(name){
+				return $http.get("/api/getId.php", {
+					params: {type: "person", name: name}
+				})
+				.then(function(res){
+					return res.data;
+				});
+			}
 		}
 	};
+
 });

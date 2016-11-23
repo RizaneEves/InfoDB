@@ -7,7 +7,7 @@
 	$pagelen = ifnset("len", 5);
 
 	if($page < 0){
-		exit("Invalid parameters");
+		returnStatus(400);
 	}
 
 	$productionYearComp = "=";
@@ -40,14 +40,12 @@
 		new DBOrder(["case when i.description IS NULL then 1 else 0 end", "ABS(YEAR(NOW()) - CAST(c.productionYear AS SIGNED)) ASC", "c.title ASC"])
 	]);
 
-	$starttime = microtime(true);
 	$result = $query->queryRange($pagelen, $page);
-	$endtime = microtime(true);
-	$timeused = $endtime - $starttime;
+	$timeused = $db->getLastQueryTime();
 	$resultLen = $db->getLastQueryCount();
 
 	if(!$result){
-		exit("Invalid query.");
+		returnStatus(400);
 	}
 
 	$maxPage = ceil($resultLen / $pagelen);

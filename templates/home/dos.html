@@ -1,0 +1,46 @@
+<form name="person" class="md-padding" action="/search/dos">
+	<div class="title">
+		Degrees of Separation
+	</div>
+	<p><small>Advanced Function</small></p>
+	<p>
+		Ever wondering the degrees of separation between two people? If yes then you have come to the right place!
+	</p>
+	<div layout="row">
+		<md-autocomplete flex
+			md-search-text="query.dos.name1_str"
+			md-selected-item="query.dos.name1"
+			md-items="item in query.helpers.queryPersonId(query.dos.name1_str)"
+			md-item-text="item.name"
+			md-floating-label="Person #1"
+			md-delay="500"
+			md-require-match
+			required
+		>
+			<md-item-template>
+				<span md-highlight-text="query.dos.name1_str" md-highlight-flags="i">{{item.name}}</span>
+			</md-item-template>
+			<md-not-found>Nothing comes up...</md-not-found>
+		</md-autocomplete>
+		<md-autocomplete flex
+			md-search-text="query.dos.name2_str"
+			md-selected-item="query.dos.name2"
+			md-items="item in query.helpers.queryPersonId(query.dos.name2_str)"
+			md-item-text="item.name"
+			md-floating-label="Person #2"
+			md-delay="500"
+			md-require-match
+			required
+		>
+			<md-item-template>
+				<span md-highlight-text="query.dos.name2_str" md-highlight-flags="i">{{item.name}}</span>
+			</md-item-template>
+			<md-not-found>Nothing comes up...</md-not-found>
+		</md-autocomplete>
+		<div>
+			<md-button type="submit" class="md-raised">Go &gt;</md-button>
+		</div>
+		<input type="hidden" name="name1" ng-value="query.dos.name1.id" required>
+		<input type="hidden" name="name2" ng-value="query.dos.name2.id" required>
+	</div>
+</form>

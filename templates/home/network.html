@@ -1,0 +1,30 @@
+<form name="person" class="md-padding" action="/api/graph.php">
+	<div class="title">
+		Network Explorer
+	</div>
+	<p><small>Advanced Function</small></p>
+	<p>
+		Are you more of a visual person who hates reading boring lists? Come on in to take a look at how celebrities are related!
+	</p>
+	<div layout="row">
+		<md-autocomplete flex
+			md-search-text="query.network.name_str"
+			md-selected-item="query.network.name"
+			md-items="item in query.helpers.queryPersonId(query.network.name_str)"
+			md-item-text="item.name"
+			md-floating-label="Name"
+			md-delay="500"
+			md-require-match
+			required
+		>
+			<md-item-template>
+				<span md-highlight-text="query.network.name_str" md-highlight-flags="i">{{item.name}}</span>
+			</md-item-template>
+			<md-not-found>Nothing comes up...</md-not-found>
+		</md-autocomplete>
+		<div>
+			<md-button type="submit" class="md-raised">Go &gt;</md-button>
+		</div>
+		<input type="hidden" name="id" ng-value="query.network.name.id" required>
+	</div>
+</form>

@@ -34,6 +34,12 @@ $activePage = "home";
 					<md-tab label="Movie">
 						<?php include("templates/home/movie_search.html") ?>
 					</md-tab>
+					<md-tab label="Degrees of Separation Finder">
+						<?php include("templates/home/dos.html") ?>
+					</md-tab>
+					<md-tab label="Network Explorer">
+						<?php include("templates/home/network.html") ?>
+					</md-tab>
 				</md-tabs>
 			</div>
 			<?php include("templates/commons/sidebar.php") ?>

@@ -29,7 +29,7 @@
 	$basicInfo = $query->query();
 
 	if(!$basicInfo || count($basicInfo) < 1){
-		exit("Invalid query.");
+		returnStatus(400);
 	}
 	$basicInfo = $basicInfo[0];	// select first row
 
@@ -41,6 +41,9 @@
 		new DBOrder(["c.firstname ASC", "c.lastname ASC"])
 	]);
 	$celebrities = $query->query();
+
+	// record visit for analytics
+	QueryCache::storeEntry("cinematography", $basicInfo[0], "i");
 ?>
 <!doctype html>
 <html>
@@ -68,7 +71,14 @@
 		<?php include($root."/templates/commons/header.php") ?>
 		<div id="wrapper" class="row" ng-app="infodb" ng-controller="main">
 			<div id="content" class="col-md-8">
-				<h1><?php echo $basicInfo[1] ?></h1>
+				<div layout="row" layout-align="start center">
+					<h1 flex><?php echo $basicInfo[1] ?></h1>
+					<md-button class="md-icon-button" aria-label="Open in IMDb"
+						href="<?php echo "http://akas.imdb.com/find?q={$basicInfo[1]}&tt=on&mx=20" ?>" target="_blank">
+						<md-tooltip md-direction="left">Open in IMDb</md-tooltip>
+						<md-icon md-svg-src="/resources/images/launch.svg"></md-icon>
+					</md-button>
+				</div>
 				
 				<!-- Type -->
 				<md-content class="info-paragraph text-capitalize">

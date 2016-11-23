@@ -29,7 +29,7 @@
 	$basicInfo = $query->query();
 
 	if(!$basicInfo || count($basicInfo) < 1){
-		exit("Invalid query.");
+		returnStatus(400);
 	}
 	$basicInfo = $basicInfo[0];	// select first row
 	$basicInfo[6] = strtotime($basicInfo[6]);	// convert date to unix timestamp
@@ -51,6 +51,9 @@
 		new DBOrder(["c.productionYear DESC"])
 	]);
 	$cinematographies = $query->query();
+
+	// record visit for analytics
+	QueryCache::storeEntry("celebrity", $basicInfo[0], "i");
 ?>
 <!doctype html>
 <html>
@@ -78,7 +81,14 @@
 		<?php include($root."/templates/commons/header.php") ?>
 		<div id="wrapper" class="row" ng-app="infodb" ng-controller="main">
 			<div id="content" class="col-md-8">
-				<h1><?php echo $basicInfo[1]." ".$basicInfo[2] ?></h1>
+				<div layout="row" layout-align="start center">
+					<h1 flex><?php echo $basicInfo[1]." ".$basicInfo[2] ?></h1>
+					<md-button class="md-icon-button" aria-label="Open in IMDb"
+						href="<?php echo "http://akas.imdb.com/find?q={$basicInfo[1]} {$basicInfo[2]}&tt=on&mx=20" ?>" target="_blank">
+						<md-tooltip md-direction="left">Open in IMDb</md-tooltip>
+						<md-icon md-svg-src="/resources/images/launch.svg"></md-icon>
+					</md-button>
+				</div>
 				<md-chips>
 				<?php foreach($occupations as $occupation){ ?>
 					<md-chip><?php echo $occupation[0] ?></md-chip>
