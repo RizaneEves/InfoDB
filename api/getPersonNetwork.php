@@ -1,8 +1,8 @@
 <?php
-	function findPersonNetwork($personID) {
-		$root = $_SERVER['DOCUMENT_ROOT'];
-		include $root."/internal/commons.php";
+	$root = $_SERVER['DOCUMENT_ROOT'];
+	include $root."/internal/commons.php";
 
+	function findPersonNetwork($personID) {
 		$db = new DBAccess();
 		$query = new DBQuery($db);
 
@@ -20,7 +20,7 @@
 			ORDER BY c.id
 		*/
 		$query->group = new DBGroup([
-			new DBSelect(["c.firstName", "c.lastName", "c.id", "m.id", "m.title", "m.productionYear", "m.type"]),
+			new DBSelect(["c.firstName", "c.lastName", "c.id", "m.id", "m.title", "m.productionYear", "m.type", "c.ranking"]),
 			new DBFrom(["Involving i, Celebrity c, Cinematography m"]),
 			new DBWhere(["i.cinematographyId = m.id", "i.celebrityId = c.id", "c.id != ?", 
 				"m.id IN (SELECT cinematographyId FROM Involving WHERE celebrityId = ?)"], 
@@ -51,16 +51,29 @@
 				$node = false;
 			}
 			if (!$node || $node["id"] != $row[2]) {
-				$network["nodes"][] = ["display" => $row[0] . " " . $row[1], "id" => $row[2], "cinematographies" => []];
+				$network["nodes"][] = ["display" => $row[0] . " " . $row[1], "id" => $row[2], "cinematographies" => [], "ranking" => $row[7]];
 				end($network["nodes"]);
 				$node = &$network["nodes"][key($network["nodes"])];
 			}
 			$node["cinematographies"][] = ["id" => $row[3], "title" => $row[4], "year" => $row[5], "type" => $row[6]];
 		}
+		foreach($network["nodes"] as $node){
+			$size = count($node["cinematographies"]);
+			if(!isset($maxSize) || $size > $maxSize)	$maxSize = $size;
+			if(!isset($minSize) || $size < $minSize)	$minSize = $size;
+		}
+		$network["maxCinematographiesSize"] = $maxSize;
+		$network["minCinematographiesSize"] = $minSize;
 		
 		return json_encode($network);
 	}
 
+	// Return HTTP 400 if parameter not set
+	if(!isset($_GET["id"])){
+		returnStatus(400);
+	}
+	// Return result in JSON
+	header('Content-Type: application/json');
 	echo findPersonNetwork((int) $_GET["id"]);
 ?>
 

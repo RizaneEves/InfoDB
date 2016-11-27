@@ -1,0 +1,31 @@
+<md-content class="sidebar" layout="column" ng-if="inspectingNode">
+	<md-toolbar class="md-tall">
+		<span flex></span>
+		<h2 class="md-toolbar-tools">{{inspectingNode.data("display")}}</h2>
+	</md-toolbar>
+	<md-content flex>
+		<md-list flex>
+			<md-list-item class="md-2-line" ng-click="searchPerson(inspectingNode.data('id'))">
+				<div class="md-list-item-text">
+					<h3>View {{inspectingNode.data("display")}}'s network</h3>
+				</div>
+			</md-list-item>
+			<md-list-item class="md-2-line" ng-click="showPersonDetails(inspectingNode.data('id'))">
+				<div class="md-list-item-text">
+					<h3>View {{inspectingNode.data("display")}} on InfoDB</h3>
+				</div>
+			</md-list-item>
+			<md-subheader class="md-no-sticky">
+				Shared cinematographies
+			</md-subheader>
+			<md-list-item class="md-3-line" ng-repeat="cinematography in inspectingNode.data('cinematographies')"
+				ng-click="showMovieDetails(cinematography.id)">
+				<div class="md-list-item-text">
+					<h3>{{cinematography.title}}</h3>
+					<h4>{{cinematography.type}}</h4>
+					<p>Produced in {{cinematography.year}}</p>
+				</div>
+			</md-list-item>
+		</md-list>
+	</md-content>
+</md-content>
