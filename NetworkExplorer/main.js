@@ -2,8 +2,8 @@ angular.module("explorer", ["ngRoute", "ngAnimate", "ngMessages", "ngMaterial"])
 
 .config(function($mdThemingProvider, $routeProvider) {
 	$mdThemingProvider.theme("default")
-		.primaryPalette("indigo")
-		.accentPalette("blue");
+		.primaryPalette("blue")
+		.accentPalette("indigo");
 
 	$routeProvider
 		.when("/", {
@@ -17,7 +17,9 @@ angular.module("explorer", ["ngRoute", "ngAnimate", "ngMessages", "ngMaterial"])
 		.otherwise("/");
 })
 
-.controller("top", function($scope, $q, $http, $location){
+.value("BASE_TITLE", "Network Explorer - InfoDB")
+
+.controller("top", function($scope, $q, $http, $location, $timeout, $mdDialog){
 	// Initialize stage for Cytoscape
 	$scope.stageContainer = document.getElementById("stage");
 	var stylesheet = $http.get("cyStyles.css").then(function(res){
@@ -41,7 +43,6 @@ angular.module("explorer", ["ngRoute", "ngAnimate", "ngMessages", "ngMaterial"])
 		if(id)
 			$location.path("/person/" + id);
 	};
-
 	$scope.findPersonId = function(name){
 		return $http.get("/api/getId.php", {
 			params: {type: "person", name: name}
@@ -50,25 +51,81 @@ angular.module("explorer", ["ngRoute", "ngAnimate", "ngMessages", "ngMaterial"])
 			return res.data;
 		});
 	};
+	
+	// Initialize route state
+	$scope.currentState = {state: "idle"};
 
-	// Misc
-	$scope.isLoading = false;
+	// Initialize loading dialog
+	$scope.loadingDialog = {message: ""};
 	$scope.loads = function(promise){
-		$scope.isLoading = true;
+		$mdDialog.show({
+			controller: function(){},
+			templateUrl: "loadingDialog.html",
+			escapeToClose: false,
+			clickOutsideToClose: false,
+			scope: $scope.$new()
+		});
+
 		return promise.finally(function(){
-			$scope.isLoading = false;
+			$mdDialog.hide();
 			return promise;
 		});
 	};
+
+	// Initialize menu items
+	$scope.menu = {
+		opened: false,
+		showTooltips: false,
+		items: [{
+			label: "Back to InfoDB",
+			icon: "/resources/images/home.svg",
+			click: function(){
+				location.href = "/";
+			}
+		}]
+	};
+	$scope.$watch("menu.opened", function(state){
+		// show tooltips after 250ms
+		$timeout(function(){
+			$scope.menu.showTooltips = state;
+		}, state ? 250 : 0);
+	});
 })
 
 // Controllers below inherit $scope from top
-.controller("idle", function($scope, $http){
+.controller("idle", function($scope, $http, BASE_TITLE){
 	console.log("idle", $scope.cy);
+	$scope.currentState.state = "idle";
+	document.title = BASE_TITLE;
+	// set up fab menu
+	$scope.menu.items = [{
+		label: "Back to InfoDB",
+		icon: "/resources/images/home.svg",
+		click: function(){
+			location.href = "/";
+		}
+	}];
 })
 
-.controller("person", function($scope, $http, $routeParams, $mdToast){
+.controller("person", function($scope, $q, $http, $routeParams, $mdToast, BASE_TITLE){
 	console.log("person", $scope.cy, $routeParams.id);
+	// set up current state
+	$scope.currentState.state = "person";
+	// set up fab menu
+	$scope.menu.items = [{
+		label: "Back to InfoDB",
+		icon: "/resources/images/home.svg",
+		click: function(){
+			location.href = "/";
+		}
+	}, {
+		label: "Fit to Screen",
+		icon: "/resources/images/fitToScreen.svg",
+		click: function(){
+			cy.fit();
+		}
+	}];
+	// store id
 	$scope.id = $routeParams.id;
 
 	$scope.showPersonDetails = function(id){
@@ -78,11 +135,19 @@ angular.module("explorer", ["ngRoute", "ngAnimate", "ngMessages", "ngMaterial"])
 		window.open("/info/movie/?id=" + id, "_blank");
 	};
 
+	$scope.loadingDialog.message = "Generating graph...";
 	$scope.loads($http.get("/api/getPersonNetwork.php", {
 		params: {id: $scope.id}
-	})).then(function(res){
+	}).then(function(res){
+		var deferred = $q.defer();
 		$scope.query.searchText = res.data.targetName;
-		return res.data;
+		document.title = res.data.targetName + " - " + BASE_TITLE;
+		$scope.loadingDialog.message = "Rendering " + (res.data.nodes.length + 1) + " nodes...";
+		// update dom
+		setTimeout(function(){
+			deferred.resolve(res.data);
+		});
+		return deferred.promise;
 	}).then(function(data){
 		console.log(data);
 		var cy = $scope.cy;
@@ -184,7 +249,6 @@ angular.module("explorer", ["ngRoute", "ngAnimate", "ngMessages", "ngMaterial"])
 					var y = levelNodes[j].position().y;
 					if(y < max){
 						max = y;
-						break;
 					}
 				}
 				var distance = Math.abs(max - targetPos.y),
@@ -196,12 +260,20 @@ angular.module("explorer", ["ngRoute", "ngAnimate", "ngMessages", "ngMaterial"])
 					var edges = cy.$("edge[nodeLevel="+i+"]");
 					var maxRadius = nodes.length < 3 ? levelDistance / 2 : levelDistance * (numLevels - i) * Math.sin(Math.PI * 2 /nodes.length);
 					var size = Math.min(levelDistance * (1 - 0.2 * (numLevels - i) / numLevels), maxRadius * 2);
-					nodes.style({width: size, height: size, fontSize: size / 5, textOutlineWidth: size / 50});
+					nodes.style({width: size, height: size, fontSize: size / 5, textOutlineWidth: size / 50, borderWidth: size / 25});
 					edges.style({width: size * 0.1, zIndex: i});
 				}
 			}
 		});
 		cy.endBatch();
+	})).catch(function(err){
+		console.error(err);
+		$mdToast.show(
+      			$mdToast.simple()
+        		.textContent("Failed to load graph: " + err.data.replace(/<.+?>/g, "").trim())
+			.action("OK")
+			.hideDelay(5000)
+		);
 	});
 })
 

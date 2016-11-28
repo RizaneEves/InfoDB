@@ -45,7 +45,7 @@ $activePage = "home";
 				left: 20px;
 				width: 500px;
 			}
-			#loading-screen{
+			#idleMessage{
 				position: absolute;
 				top: 0;
 				left: 0;
@@ -70,7 +70,12 @@ $activePage = "home";
 		</style>
 	</head>
 	<body class="body container-fluid" ng-app="explorer" ng-controller="top">
-		<div id="stage"></div>
+		<md-content id="idleMessage" layout="column" layout-align="center center" ng-if="currentState.state == 'idle'">
+			<h2>Welcome to NetworkExplorer.</h2>
+			<p>Search for a celebrity to explore different celebrities that they both have participated in the same movies.</p>
+			<p>The more movies they are in together, the larger and closer the nodes will be.</p>
+		</md-content>
+		<div id="stage" ng-show="currentState.state == 'person'"></div>
 		<md-autocomplete
 			id="search-box"
 			md-search-text="query.searchText"
@@ -86,8 +91,22 @@ $activePage = "home";
 			</md-item-template>
 		</md-autocomplete>
 		<span id="hiddenView" ng-view></span>
-		<div id="loading-screen" layout="column" layout-align="center center" ng-if="isLoading">
-			<md-progress-circular md-mode="indeterminate"></md-progress-circular>
-		</div>
+		<md-fab-speed-dial md-direction="up" md-open="menu.opened" class="md-scale md-fab-bottom-left">
+			<md-fab-trigger>
+				<md-button aria-label="menu" class="md-fab">
+					<md-icon md-svg-src="/resources/images/menu.svg"></md-icon>
+				</md-button>
+			</md-fab-trigger>
+			<md-fab-actions>
+				<div ng-repeat="item in menu.items">
+					<md-button aria-label="{{item.label}}" class="md-fab md-raised md-mini" ng-click="item.click()">
+						<md-tooltip md-direction="right" md-visible="menu.showTooltips" md-autohide="false">
+							{{item.label}}
+						</md-tooltip>
+						<md-icon md-svg-src="{{item.icon}}" aria-label="{{item.label}}"></md-icon>
+					</md-button>
+				</div>
+			</md-fab-actions>
+		</md-fab-speed-dial>
 	</body>
 </html>

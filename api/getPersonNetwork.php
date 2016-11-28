@@ -72,8 +72,18 @@
 	if(!isset($_GET["id"])){
 		returnStatus(400);
 	}
+
+	function shutdownHandler(){
+		$error = error_get_last();
+		if($error['type'] === E_ERROR) { 
+			http_response_code(500);
+		}
+	}
+	register_shutdown_function("shutdownHandler");		
+
 	// Return result in JSON
+	$json = findPersonNetwork((int) $_GET["id"]);
 	header('Content-Type: application/json');
-	echo findPersonNetwork((int) $_GET["id"]);
-?>
+	echo $json;
+ ?>
 

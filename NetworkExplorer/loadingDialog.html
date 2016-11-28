@@ -1,0 +1,13 @@
+<style>
+	#loadingMessage{
+		margin-left: 24px;
+	}
+</style>
+<md-dialog aria-label="Loading">
+	<md-dialog-content>
+		<div class="md-dialog-content" layout="row" layout-align="center center">
+			<md-progress-circular md-mode="indeterminate"></md-progress-circular>
+			<span id="loadingMessage">{{loadingDialog.message}}</span>
+		</div>
+	</md-dialog-content>
+</md-dialog>

@@ -10,10 +10,12 @@ node{
 	text-outline-width: 2px;
 	content: data(display);
 	background-color: mapData(nodeLevel, 0, 4, orange, red);
+	border-opacity: 0;
 }
 node:selected{
 	border-color: rgb(63,81,181);
 	border-width: 1em;
+	border-opacity: 1;
 }
 
 edge{

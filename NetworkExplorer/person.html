@@ -6,26 +6,34 @@
 	<md-content flex>
 		<md-list flex>
 			<md-list-item class="md-2-line" ng-click="searchPerson(inspectingNode.data('id'))">
+				<md-button class="md-icon-button">
+					<md-icon md-svg-icon="/resources/images/network.svg"></md-icon>
+				</md-button>
 				<div class="md-list-item-text">
 					<h3>View {{inspectingNode.data("display")}}'s network</h3>
 				</div>
 			</md-list-item>
 			<md-list-item class="md-2-line" ng-click="showPersonDetails(inspectingNode.data('id'))">
+				<md-button class="md-icon-button">
+					<md-icon md-svg-icon="/resources/images/exitToApp.svg"></md-icon>
+				</md-button>
 				<div class="md-list-item-text">
 					<h3>View {{inspectingNode.data("display")}} on InfoDB</h3>
 				</div>
 			</md-list-item>
-			<md-subheader class="md-no-sticky">
-				Shared cinematographies
-			</md-subheader>
-			<md-list-item class="md-3-line" ng-repeat="cinematography in inspectingNode.data('cinematographies')"
-				ng-click="showMovieDetails(cinematography.id)">
-				<div class="md-list-item-text">
-					<h3>{{cinematography.title}}</h3>
-					<h4>{{cinematography.type}}</h4>
-					<p>Produced in {{cinematography.year}}</p>
-				</div>
-			</md-list-item>
+			<div ng-if="inspectingNode.hasClass('related-nodes')">
+				<md-subheader class="md-no-sticky">
+					Shared cinematographies ({{inspectingNode.data("cinematographies").length || 0}})
+				</md-subheader>
+				<md-list-item class="md-3-line" ng-repeat="cinematography in inspectingNode.data('cinematographies')"
+					ng-click="showMovieDetails(cinematography.id)">
+					<div class="md-list-item-text">
+						<h3>{{cinematography.title}}</h3>
+						<h4>{{cinematography.type}}</h4>
+						<p>Produced in {{cinematography.year}}</p>
+					</div>
+				</md-list-item>
+			</div>
 		</md-list>
 	</md-content>
 </md-content>
