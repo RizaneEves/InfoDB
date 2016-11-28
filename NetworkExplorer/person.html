@@ -1,22 +1,18 @@
-<md-content class="sidebar" layout="column" ng-if="inspectingNode">
-	<md-toolbar class="md-tall">
+<md-content class="sidebar md-whiteframe-4dp" layout="column" ng-if="inspectingNode">
+	<md-toolbar class="md-tall" md-scroll-shrink>
 		<span flex></span>
 		<h2 class="md-toolbar-tools">{{inspectingNode.data("display")}}</h2>
 	</md-toolbar>
 	<md-content flex>
 		<md-list flex>
 			<md-list-item class="md-2-line" ng-click="searchPerson(inspectingNode.data('id'))">
-				<md-button class="md-icon-button">
-					<md-icon md-svg-icon="/resources/images/network.svg"></md-icon>
-				</md-button>
+				<md-icon md-svg-icon="/resources/images/network.svg"></md-icon>
 				<div class="md-list-item-text">
 					<h3>View {{inspectingNode.data("display")}}'s network</h3>
 				</div>
 			</md-list-item>
 			<md-list-item class="md-2-line" ng-click="showPersonDetails(inspectingNode.data('id'))">
-				<md-button class="md-icon-button">
-					<md-icon md-svg-icon="/resources/images/exitToApp.svg"></md-icon>
-				</md-button>
+				<md-icon md-svg-icon="/resources/images/exitToApp.svg"></md-icon>
 				<div class="md-list-item-text">
 					<h3>View {{inspectingNode.data("display")}} on InfoDB</h3>
 				</div>

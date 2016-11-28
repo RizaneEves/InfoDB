@@ -120,7 +120,7 @@
 				<md-list flex>
 				<?php foreach($cinematographies as $cinematography){ ?>
 					<?php /* Remove titles that are in parenthesis */ ?>
-					<?php if(preg_match("/\(.*\)/", $cinematography[1])){ continue; } ?>
+					<?php if(preg_match("/^\(.*\)$/", $cinematography[1])){ continue; } ?>
 					<md-list-item class="md-2-line" ng-click="displayMovie(<?php echo $cinematography[0] ?>)"> <!-- Not safe but no one cares -->
 						<div class="md-list-item-text">
 							<h3><?php echo $cinematography[1] ?>

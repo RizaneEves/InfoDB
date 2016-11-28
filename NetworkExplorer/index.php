@@ -56,7 +56,6 @@ $activePage = "home";
 				width: 350px;
 				height: 100%;
 				background: white;
-				box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
 			}
 			.sidebar.ng-enter, .sidebar.ng-leave{	
 				-webkit-transition: -webkit-transform 0.3s ease;
@@ -66,6 +65,18 @@ $activePage = "home";
 			}
 			.sidebar.ng-leave, .sidebar.ng-enter.ng-enter-active{
 				-webkit-transform: translateX(0%);
+			}
+
+			@media (max-width: 991px){
+				#search-box{
+					top: 12px;
+					left: 12px;
+					right: 12px;
+					width: auto;
+				}
+				.sidebar{
+					width: 300px;
+				}
 			}
 		</style>
 	</head>
@@ -90,7 +101,6 @@ $activePage = "home";
 				<span>{{item.name}}</span>
 			</md-item-template>
 		</md-autocomplete>
-		<span id="hiddenView" ng-view></span>
 		<md-fab-speed-dial md-direction="up" md-open="menu.opened" class="md-scale md-fab-bottom-left">
 			<md-fab-trigger>
 				<md-button aria-label="menu" class="md-fab">
@@ -108,5 +118,6 @@ $activePage = "home";
 				</div>
 			</md-fab-actions>
 		</md-fab-speed-dial>
+		<span id="hiddenView" ng-view></span>
 	</body>
 </html>

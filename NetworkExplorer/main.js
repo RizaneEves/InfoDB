@@ -33,6 +33,9 @@ angular.module("explorer", ["ngRoute", "ngAnimate", "ngMessages", "ngMaterial"])
 		},
 		style: stylesheet,
 	});
+	$scope.cy.on("tapstart", function(){
+		document.activeElement.blur();
+	});
 	window.cy = $scope.cy;
 
 	// Initialize query related functions
@@ -40,8 +43,10 @@ angular.module("explorer", ["ngRoute", "ngAnimate", "ngMessages", "ngMaterial"])
 		searchText: ""
 	};
 	$scope.searchPerson = function(id){
-		if(id)
+		if(id){
 			$location.path("/person/" + id);
+			document.activeElement.blur();
+		}
 	};
 	$scope.findPersonId = function(name){
 		return $http.get("/api/getId.php", {
@@ -87,7 +92,7 @@ angular.module("explorer", ["ngRoute", "ngAnimate", "ngMessages", "ngMaterial"])
 	$scope.$watch("menu.opened", function(state){
 		// show tooltips after 250ms
 		$timeout(function(){
-			$scope.menu.showTooltips = state;
+			$scope.menu.showTooltips = $scope.menu.opened;
 		}, state ? 250 : 0);
 	});
 })
@@ -127,6 +132,8 @@ angular.module("explorer", ["ngRoute", "ngAnimate", "ngMessages", "ngMaterial"])
 	}];
 	// store id
 	$scope.id = $routeParams.id;
+	// defocus input
+	document.activeElement.blur();
 
 	$scope.showPersonDetails = function(id){
 		window.open("/info/person/?id=" + id, "_blank");
