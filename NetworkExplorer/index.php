@@ -1,7 +1,3 @@
-<?php
-$activePage = "home";
-?>
-
 <!doctype html>
 <html>
 	<head>

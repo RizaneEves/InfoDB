@@ -1,4 +1,4 @@
-<form name="person" class="md-padding" action="/search/dos">
+<form name="person" class="md-padding" ng-submit="query.dos.doSearch()" layout="column">
 	<div class="title">
 		Degrees of Separation
 	</div>
@@ -42,5 +42,27 @@
 		</div>
 		<input type="hidden" name="name1" ng-value="query.dos.name1.id" required>
 		<input type="hidden" name="name2" ng-value="query.dos.name2.id" required>
+	</div>
+	<div ng-switch="query.dos.status" flex layout="column" layout-align="center center">
+		<div ng-switch-when="idle"></div>
+		<div ng-switch-when="loading" layout="row" layout-align="center center" layout-margin>
+			<md-progress-circular md-diameter="20px"></md-progress-circular>
+			Performing BFS... Hang on tight, it will take a while...
+		</div>
+		<div ng-switch-when="failed">Request failed. Please try again later.</div>
+		<div ng-switch-when="not-found">Unfortunately, a path cannot be found within 2 levels of separations with the limitaion of 30,000 nodes.</div>
+		<div ng-switch-when="success" layout="column" layout="center center">
+			<h3>{{ query.dos.resultsMeta.sourceName }} and {{ query.dos.resultsMeta.targetName }} has a separation of {{ query.dos.resultsMeta.degrees }} degrees.</h3>
+			<div ng-repeat="entry in query.dos.results" ng-switch="entry.type">
+				<div ng-switch-when="celebrity" class="text-center" >
+					<md-button class="md-warn" ng-click="query.helpers.goToInfo(entry.type, entry.id)">{{entry.firstName + " " + entry.lastName}}</md-button>
+				</div>
+				<div ng-switch-when="cinematography" layout="column" layout-align="center center">
+					<div>|</div>
+					<md-button ng-click="query.helpers.goToInfo(entry.type, entry.id)">{{entry.title}} ({{entry.productionYear}})</md-button>
+					<div>|</div>
+				</div>
+			</div>
+		</div>
 	</div>
 </form>
