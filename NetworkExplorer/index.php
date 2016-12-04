@@ -48,6 +48,9 @@
 				width: 100%;
 				height: 100%;
 			}
+			#idleMessage-body{
+				text-align: center;
+			}
 			.sidebar{
 				width: 350px;
 				height: 100%;
@@ -79,8 +82,10 @@
 	<body class="body container-fluid" ng-app="explorer" ng-controller="top">
 		<md-content id="idleMessage" layout="column" layout-align="center center" ng-if="currentState.state == 'idle'">
 			<h2>Welcome to NetworkExplorer.</h2>
-			<p>Search for a celebrity to explore different celebrities that they both have participated in the same movies.</p>
-			<p>The more movies they are in together, the larger and closer the nodes will be.</p>
+			<p id="idleMessage-body">
+				Search for a celebrity to explore different celebrities that they both have participated in the same movies.<br>
+				The more movies they are in together, the larger and closer the nodes will be.
+			</p>
 		</md-content>
 		<div id="stage" ng-show="currentState.state == 'person'"></div>
 		<md-autocomplete
