@@ -15,3 +15,5 @@ Video demonstration: https://www.youtube.com/watch?v=LqMV8iCdpFs
 - Brendan Wilson - Data import and mangling; Network Explorer backend; Idea spitballing
 
 Big thanks to IMDb for the data used.
+
+Copyright 2016 All Authors.
