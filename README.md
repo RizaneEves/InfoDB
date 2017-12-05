@@ -5,7 +5,7 @@ The Amazing InfoDB is a school project and it is all about the connectivity of d
 InfoDB can display detailed information about a celebrity and provide customized searching similar to IMDB. InfoDB also features NetworkExplorer that shows a graph (nodes/edges) to represent the connection between actors/producers through movies they were involved.
 
 ## Details
-Please read the [detailed report](/Project Report.pdf).  
+Please read the [detailed report](/Project%20Report.pdf).  
 Video demonstration: https://www.youtube.com/watch?v=LqMV8iCdpFs
 
 ## Credits
